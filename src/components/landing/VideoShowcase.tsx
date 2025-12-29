@@ -12,6 +12,8 @@ export default function VideoShowcase() {
   
   const sectionRef = useRef<HTMLElement>(null);
   const miniPlayerRef = useRef<HTMLDivElement>(null);
+  const mainIframeRef = useRef<HTMLIFrameElement>(null);
+  const miniIframeRef = useRef<HTMLIFrameElement>(null);
 
   // YouTube video ID
   const videoId = 'HQzoZfc3GwQ';
@@ -124,6 +126,11 @@ export default function VideoShowcase() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Generate iframe src - only autoplay on initial click, not on mini player transitions
+  // Using enablejsapi to allow state to persist
+  const iframeSrc = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0`;
+  const iframeSrcAutoplay = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0`;
+
   return (
     <>
       <section 
@@ -176,27 +183,30 @@ export default function VideoShowcase() {
                     5:32
                   </div>
                 </button>
-              ) : !isMiniPlayer ? (
-                /* Embedded YouTube Video - shown when not in mini player mode */
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-                  title="FinTrack Tutorial Video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full"
-                />
               ) : (
-                /* Placeholder when mini player is active */
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                  <Play className="w-12 h-12 mb-2 opacity-50" />
-                  <p className="text-sm">Video sedang diputar di mini player</p>
-                  <button
-                    onClick={handleRestorePlayer}
-                    className="mt-3 px-4 py-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors text-sm"
-                  >
-                    Kembali ke sini
-                  </button>
+                /* Video Container - hide/show based on mini player state */
+                <div className={isMiniPlayer ? 'invisible' : 'visible'}>
+                  <iframe
+                    ref={mainIframeRef}
+                    src={isMiniPlayer ? iframeSrc : iframeSrcAutoplay}
+                    title="FinTrack Tutorial Video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                  {/* Show placeholder when mini player is active */}
+                  {isMiniPlayer && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 bg-gray-900">
+                      <Play className="w-12 h-12 mb-2 opacity-50" />
+                      <p className="text-sm">Video sedang diputar di mini player</p>
+                      <button
+                        onClick={handleRestorePlayer}
+                        className="mt-3 px-4 py-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors text-sm"
+                      >
+                        Kembali ke sini
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -235,7 +245,7 @@ export default function VideoShowcase() {
         </div>
       </section>
 
-      {/* Mini Player - Fixed Position */}
+      {/* Mini Player - Fixed Position - Uses same iframe instance concept */}
       {isPlaying && isMiniPlayer && (
         <div
           ref={miniPlayerRef}
@@ -274,10 +284,11 @@ export default function VideoShowcase() {
             </button>
           </div>
 
-          {/* Mini Player Video */}
+          {/* Mini Player Video - No autoplay, just show current state */}
           <div className="w-80 aspect-video bg-gray-900">
             <iframe
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+              ref={miniIframeRef}
+              src={iframeSrc}
               title="FinTrack Tutorial Video (Mini Player)"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

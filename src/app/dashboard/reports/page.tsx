@@ -346,6 +346,7 @@ export default function ReportsPage() {
                       outerRadius={80}
                       paddingAngle={3}
                       dataKey="amount"
+                      nameKey="category"
                     >
                       {expenseBreakdown.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -359,7 +360,10 @@ export default function ReportsPage() {
                         padding: '12px',
                       }}
                       itemStyle={{ color: '#f0f0f5' }}
-                      formatter={(value, name) => [formatCurrency(value as number), name]}
+                      formatter={(value, name) => [
+                        formatCurrency(value as number),
+                        getCategoryName(name as string)
+                      ]}
                     />
                   </PieChart>
                 </ResponsiveContainer>
