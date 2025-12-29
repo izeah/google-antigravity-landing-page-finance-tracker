@@ -1,10 +1,19 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
+import { getCurrentUser, User } from '@/lib/auth';
 
 export default function Hero() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 pt-20">
       {/* Background Orbs */}
@@ -46,20 +55,43 @@ export default function Hero() {
           Cukup ketik seperti &quot;Beli kopi 25rb&quot; dan biarkan AI yang mengurus sisanya.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons - Conditional based on login state */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link href="/signup" className="btn-primary flex items-center gap-2 text-lg">
-            Mulai Gratis
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-          <Link href="/login" className="btn-secondary flex items-center gap-2 text-lg">
-            Sudah Punya Akun
-          </Link>
+          {user ? (
+            /* Logged In State */
+            <>
+              <Link href="/dashboard" className="btn-primary flex items-center gap-2 text-lg">
+                <LayoutDashboard className="w-5 h-5" />
+                Buka Dashboard
+              </Link>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl glass-card">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shrink-0">
+                  <span className="text-white font-bold text-sm">
+                    {user.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-gray-300">
+                  Selamat datang, <span className="font-semibold text-white">{user.name}</span>!
+                </span>
+              </div>
+            </>
+          ) : (
+            /* Guest State */
+            <>
+              <Link href="/signup" className="btn-primary flex items-center gap-2 text-lg">
+                Mulai Gratis
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link href="/login" className="btn-secondary flex items-center gap-2 text-lg">
+                Sudah Punya Akun
+              </Link>
+            </>
+          )}
         </motion.div>
 
         {/* Stats */}

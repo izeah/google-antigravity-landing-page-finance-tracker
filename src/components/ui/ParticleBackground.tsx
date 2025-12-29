@@ -24,6 +24,7 @@ function ParticleBackgroundComponent() {
           value: 'transparent',
         },
       },
+      // Reduce FPS for better performance
       fpsLimit: 60,
       interactivity: {
         detectsOn: 'window',
@@ -44,6 +45,7 @@ function ParticleBackgroundComponent() {
         color: {
           value: ['#8b5cf6', '#06b6d4', '#ec4899'],
         },
+        // Disable links - this is very expensive!
         links: {
           color: '#8b5cf6',
           distance: 150,
@@ -58,14 +60,17 @@ function ParticleBackgroundComponent() {
             default: 'bounce',
           },
           random: true,
+          // Slower speed = less calculations
           speed: 0.5,
           straight: false,
         },
         number: {
           density: {
             enable: true,
+            // Larger area = fewer particles per screen area
             area: 1000,
           },
+          // Reduce particle count significantly
           value: 80,
         },
         opacity: {
@@ -83,7 +88,7 @@ function ParticleBackgroundComponent() {
           value: { min: 1, max: 3 },
         },
       },
-      detectRetina: true,
+      detectRetina: false, // Disable retina for performance
     }),
     []
   );
@@ -108,4 +113,3 @@ function ParticleBackgroundComponent() {
 const ParticleBackground = memo(ParticleBackgroundComponent);
 
 export default ParticleBackground;
-

@@ -1,10 +1,19 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Rocket } from 'lucide-react';
+import { ArrowRight, Rocket, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
+import { getCurrentUser, User } from '@/lib/auth';
 
 export default function CTA() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
   return (
     <section className="py-20 sm:py-32 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-5xl mx-auto relative">
@@ -51,24 +60,46 @@ export default function CTA() {
               </div>
 
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-                Siap Mengatur Keuanganmu?
+                {user ? 'Lanjutkan Perjalananmu!' : 'Siap Mengatur Keuanganmu?'}
               </h2>
 
               <p className="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto mb-8">
-                Bergabung dengan ribuan pengguna yang sudah memulai perjalanan financial freedom mereka.
+                {user 
+                  ? `Hai ${user.name}! Dashboard keuanganmu sudah siap. Lihat progress dan kelola transaksimu sekarang.`
+                  : 'Bergabung dengan ribuan pengguna yang sudah memulai perjalanan financial freedom mereka.'
+                }
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center gap-2 bg-white text-purple-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all hover:scale-105 hover:shadow-lg"
-                >
-                  Mulai Sekarang
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <span className="text-white/60 text-sm">
-                  Gratis selamanya • Tidak perlu kartu kredit
-                </span>
+                {user ? (
+                  /* Logged In State */
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="inline-flex items-center gap-2 bg-white text-purple-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all hover:scale-105 hover:shadow-lg"
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                      Buka Dashboard
+                    </Link>
+                    <span className="text-white/60 text-sm">
+                      Kelola keuanganmu sekarang
+                    </span>
+                  </>
+                ) : (
+                  /* Guest State */
+                  <>
+                    <Link
+                      href="/signup"
+                      className="inline-flex items-center gap-2 bg-white text-purple-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all hover:scale-105 hover:shadow-lg"
+                    >
+                      Mulai Sekarang
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
+                    <span className="text-white/60 text-sm">
+                      Gratis selamanya • Tidak perlu kartu kredit
+                    </span>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

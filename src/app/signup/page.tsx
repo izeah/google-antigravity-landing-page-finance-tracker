@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2, Check } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { signup } from '@/lib/auth';
+import { signup, getCurrentUser } from '@/lib/auth';
 
 const ParticleBackground = dynamic(() => import('@/components/ui/ParticleBackground'), {
   ssr: false,
@@ -16,6 +16,7 @@ export default function SignupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,6 +24,25 @@ export default function SignupPage() {
     email: '',
     password: '',
   });
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user) {
+      router.replace('/dashboard');
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
+
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 animate-pulse" />
+      </div>
+    );
+  }
 
   const passwordRequirements = [
     { text: 'Minimal 8 karakter', met: formData.password.length >= 8 },
