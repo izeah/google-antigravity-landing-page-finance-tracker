@@ -239,7 +239,7 @@ body {
 }
 
 .input-with-icon {
-  padding-left: 3.25rem;
+  padding-left: 3.5rem !important;
 }
 
 /* Hide default date input calendar picker */
