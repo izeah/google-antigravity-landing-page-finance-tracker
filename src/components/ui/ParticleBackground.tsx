@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, memo } from 'react';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
-import type { ISourceOptions } from '@tsparticles/engine';
+import type { ISourceOptions, Container } from '@tsparticles/engine';
 
-export default function ParticleBackground() {
+function ParticleBackgroundComponent() {
   const [init, setInit] = useState(false);
 
   useEffect(() => {
@@ -18,6 +18,7 @@ export default function ParticleBackground() {
 
   const options: ISourceOptions = useMemo(
     () => ({
+      fullScreen: false,
       background: {
         color: {
           value: 'transparent',
@@ -25,18 +26,17 @@ export default function ParticleBackground() {
       },
       fpsLimit: 60,
       interactivity: {
+        detectsOn: 'window',
         events: {
           onHover: {
-            enable: true,
-            mode: 'grab',
+            enable: false,
           },
-        },
-        modes: {
-          grab: {
-            distance: 150,
-            links: {
-              opacity: 0.5,
-            },
+          onClick: {
+            enable: false,
+          },
+          resize: {
+            enable: true,
+            delay: 0.5,
           },
         },
       },
@@ -88,13 +88,24 @@ export default function ParticleBackground() {
     []
   );
 
+  const particlesLoaded = async (container?: Container): Promise<void> => {
+    // Optional: You can add any initialization logic here
+  };
+
   if (!init) return null;
 
   return (
     <Particles
       id="tsparticles"
       options={options}
-      className="absolute inset-0 -z-10"
+      className="absolute inset-0 -z-10 pointer-events-none"
+      particlesLoaded={particlesLoaded}
     />
   );
 }
+
+// Memoize the component to prevent re-renders when parent state changes
+const ParticleBackground = memo(ParticleBackgroundComponent);
+
+export default ParticleBackground;
+
