@@ -44,7 +44,7 @@ export default function Navbar() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'glass-card !rounded-none border-x-0 border-t-0' : ''
+          isScrolled ? 'bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-gray-800/50' : ''
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

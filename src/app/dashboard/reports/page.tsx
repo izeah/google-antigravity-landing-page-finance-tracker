@@ -356,8 +356,10 @@ export default function ReportsPage() {
                         backgroundColor: '#12121a',
                         border: '1px solid #2a2a35',
                         borderRadius: '12px',
+                        padding: '12px',
                       }}
-                      formatter={(value) => formatCurrency(value as number)}
+                      itemStyle={{ color: '#f0f0f5' }}
+                      formatter={(value, name) => [formatCurrency(value as number), name]}
                     />
                   </PieChart>
                 </ResponsiveContainer>
