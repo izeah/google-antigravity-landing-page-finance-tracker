@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Filter, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, Trash2, Pencil } from 'lucide-react';
 import TransactionForm from '@/components/dashboard/TransactionForm';
+import EditTransactionModal from '@/components/dashboard/EditTransactionModal';
 import { getCurrentUser } from '@/lib/auth';
 import { getTransactions, deleteTransaction, Transaction } from '@/lib/storage';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -60,9 +61,21 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setIsEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setIsEditOpen(false);
+    setEditingTransaction(null);
+  };
 
   const loadData = useCallback(() => {
     const user = getCurrentUser();
@@ -183,7 +196,7 @@ export default function TransactionsPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="input-field input-with-icon pr-10 appearance-none cursor-pointer min-w-[160px]"
+              className="input-field input-with-icon pr-10 appearance-none min-w-[160px]"
             >
               <option value="all">Semua Kategori</option>
               {allCategories.map((cat) => (
@@ -269,12 +282,22 @@ export default function TransactionsPage() {
                         {formatCurrency(transaction.amount)}
                       </td>
                       <td className="p-4 text-right">
-                        <button
-                          onClick={() => handleDelete(transaction.id)}
-                          className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(transaction)}
+                            className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(transaction.id)}
+                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                            title="Hapus"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   );
@@ -326,6 +349,14 @@ export default function TransactionsPage() {
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         onSuccess={loadData}
+      />
+
+      {/* Edit Transaction Modal */}
+      <EditTransactionModal
+        isOpen={isEditOpen}
+        onClose={handleEditClose}
+        onSuccess={loadData}
+        transaction={editingTransaction}
       />
     </div>
   );
