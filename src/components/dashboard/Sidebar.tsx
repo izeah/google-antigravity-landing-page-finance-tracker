@@ -92,7 +92,7 @@ export default function Sidebar() {
             </Link>
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors"
+              className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
