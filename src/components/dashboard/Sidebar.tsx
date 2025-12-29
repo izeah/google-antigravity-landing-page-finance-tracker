@@ -16,6 +16,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { getCurrentUser, logout, User } from '@/lib/auth';
+import { LogoutDialog } from '@/components/ui/ConfirmDialog';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -31,6 +32,7 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -41,7 +43,11 @@ export default function Sidebar() {
     }
   }, [router]);
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setIsLogoutOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
     logout();
     router.push('/login');
   };
@@ -114,6 +120,8 @@ export default function Sidebar() {
                   ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white border border-purple-500/30'
                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`}
+              data-tooltip={isCollapsed ? item.name : undefined}
+              data-tooltip-position="right"
             >
               <item.icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-purple-400' : ''}`} />
               {!isCollapsed && <span className="font-medium">{item.name}</span>}
@@ -138,10 +146,12 @@ export default function Sidebar() {
           </div>
         )}
         <button
-          onClick={handleLogout}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all w-full ${
+          onClick={handleLogoutClick}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all w-full cursor-pointer ${
             isCollapsed ? 'justify-center' : ''
           }`}
+          data-tooltip={isCollapsed ? 'Keluar' : undefined}
+          data-tooltip-position="right"
         >
           <LogOut className="w-5 h-5 shrink-0" />
           {!isCollapsed && <span className="font-medium">Keluar</span>}
@@ -200,6 +210,13 @@ export default function Sidebar() {
       >
         {sidebarContent}
       </aside>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutDialog
+        isOpen={isLogoutOpen}
+        onClose={() => setIsLogoutOpen(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </>
   );
 }

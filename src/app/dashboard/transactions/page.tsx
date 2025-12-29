@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Plus, Search, Filter, Trash2, Pencil } from 'lucide-react';
 import TransactionForm from '@/components/dashboard/TransactionForm';
 import EditTransactionModal from '@/components/dashboard/EditTransactionModal';
+import { DeleteTransactionDialog } from '@/components/ui/ConfirmDialog';
 import { getCurrentUser } from '@/lib/auth';
 import { getTransactions, deleteTransaction, Transaction } from '@/lib/storage';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -63,6 +64,8 @@ export default function TransactionsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -75,6 +78,25 @@ export default function TransactionsPage() {
   const handleEditClose = () => {
     setIsEditOpen(false);
     setEditingTransaction(null);
+  };
+
+  const handleDeleteClick = (transaction: Transaction) => {
+    setDeletingTransaction(transaction);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingTransaction) {
+      deleteTransaction(deletingTransaction.id);
+      loadData();
+    }
+    setIsDeleteOpen(false);
+    setDeletingTransaction(null);
+  };
+
+  const handleDeleteClose = () => {
+    setIsDeleteOpen(false);
+    setDeletingTransaction(null);
   };
 
   const loadData = useCallback(() => {
@@ -115,13 +137,6 @@ export default function TransactionsPage() {
 
     setFilteredTransactions(result);
   }, [transactions, typeFilter, categoryFilter, searchQuery]);
-
-  const handleDelete = (id: string) => {
-    if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-      deleteTransaction(id);
-      loadData();
-    }
-  };
 
   const allCategories = [
     ...TRANSACTION_CATEGORIES.income,
@@ -285,15 +300,15 @@ export default function TransactionsPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleEdit(transaction)}
-                            className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
-                            title="Edit"
+                            className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
+                            data-tooltip="Edit"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(transaction.id)}
-                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                            title="Hapus"
+                            onClick={() => handleDeleteClick(transaction)}
+                            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
+                            data-tooltip="Hapus"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -357,6 +372,14 @@ export default function TransactionsPage() {
         onClose={handleEditClose}
         onSuccess={loadData}
         transaction={editingTransaction}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteTransactionDialog
+        isOpen={isDeleteOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleDeleteConfirm}
+        transactionName={deletingTransaction?.description}
       />
     </div>
   );
