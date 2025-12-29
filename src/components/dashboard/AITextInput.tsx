@@ -46,25 +46,41 @@ export default function AITextInput({ onSuccess }: AITextInputProps) {
       const categoryInfo = allCategories.find((c) => c.id === parsed.category);
       const categoryName = categoryInfo?.name || parsed.category;
 
+      // Format date for display
+      const dateObj = new Date(parsed.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      dateObj.setHours(0, 0, 0, 0);
+      
+      let dateDisplay = '';
+      const diffDays = Math.round((today.getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) {
+        dateDisplay = 'hari ini';
+      } else if (diffDays === 1) {
+        dateDisplay = 'kemarin';
+      } else if (diffDays > 1) {
+        dateDisplay = `${diffDays} hari lalu`;
+      }
+
       saveTransaction({
         type: parsed.type,
         amount: parsed.amount,
         category: parsed.category,
         description: parsed.description,
-        date: new Date().toISOString().split('T')[0],
+        date: parsed.date, // Use date from AI parser!
         userId: user.id,
       });
 
       setResult({
         success: true,
-        message: `${parsed.type === 'income' ? 'Pemasukan' : 'Pengeluaran'} ${formatCurrency(parsed.amount)} (${categoryName}) berhasil dicatat!`,
+        message: `${parsed.type === 'income' ? 'Pemasukan' : 'Pengeluaran'} ${formatCurrency(parsed.amount)} (${categoryName})${dateDisplay ? ` - ${dateDisplay}` : ''} berhasil dicatat!`,
       });
       setInput('');
       onSuccess();
     } else {
       setResult({
         success: false,
-        message: 'Tidak bisa memahami input. Coba format seperti "Beli kopi 25rb" atau "Gaji bulan ini 15jt"',
+        message: 'Tidak bisa memahami input. Coba format seperti "Beli kopi 25rb" atau "Gaji 15jt"',
       });
     }
 
@@ -76,10 +92,10 @@ export default function AITextInput({ onSuccess }: AITextInputProps) {
 
   const examples = [
     'Beli kopi 25rb',
-    'Makan siang 50000',
+    'Makan 140k',
+    'Cashback kemarin 50rb',
     'Gaji bulan ini 15jt',
-    'Bayar listrik 500rb',
-    'Freelance project 3jt',
+    'Bayar listrik 2 hari lalu 500rb',
   ];
 
   return (
