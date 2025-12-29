@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { getCurrentUser, logout, User } from '@/lib/auth';
 import { LogoutDialog } from '@/components/ui/ConfirmDialog';
+import { useSidebar } from '@/contexts/SidebarContext';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -28,8 +29,8 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const [user, setUser] = useState<User | null>(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);

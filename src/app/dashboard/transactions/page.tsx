@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, Filter, Trash2, Pencil } from 'lucide-react';
 import TransactionForm from '@/components/dashboard/TransactionForm';
 import EditTransactionModal from '@/components/dashboard/EditTransactionModal';
 import { DeleteTransactionDialog } from '@/components/ui/ConfirmDialog';
+import Pagination from '@/components/ui/Pagination';
 import { getCurrentUser } from '@/lib/auth';
 import { getTransactions, deleteTransaction, Transaction } from '@/lib/storage';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -69,6 +70,10 @@ export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
@@ -136,7 +141,24 @@ export default function TransactionsPage() {
     }
 
     setFilteredTransactions(result);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [transactions, typeFilter, categoryFilter, searchQuery]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredTransactions, currentPage, itemsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when items per page changes
+  };
 
   const allCategories = [
     ...TRANSACTION_CATEGORIES.income,
@@ -256,7 +278,7 @@ export default function TransactionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {filteredTransactions.map((transaction, index) => {
+                {paginatedTransactions.map((transaction, index) => {
                   const Icon = categoryIcons[transaction.category] || Minus;
                   const colorClass = categoryColors[transaction.category] || 'bg-gray-500/20 text-gray-400';
                   const categoryInfo = allCategories.find((c) => c.id === transaction.category);
@@ -356,6 +378,25 @@ export default function TransactionsPage() {
               </span>
             </div>
           </div>
+        </motion.div>
+      )}
+
+      {/* Pagination */}
+      {filteredTransactions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="glass-card px-4"
+        >
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredTransactions.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
         </motion.div>
       )}
 

@@ -5,6 +5,21 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { getCurrentUser } from '@/lib/auth';
 import { initializeSampleData } from '@/lib/storage';
+import { SidebarProvider, useSidebar } from '@/contexts/SidebarContext';
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
+  const { isCollapsed } = useSidebar();
+
+  return (
+    <main
+      className={`pt-16 lg:pt-0 min-h-screen transition-all duration-300 ${
+        isCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+      }`}
+    >
+      <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+    </main>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -34,13 +49,11 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
-      <Sidebar />
-      <main className="lg:pl-64 pt-16 lg:pt-0 min-h-screen">
-        <div className="p-4 sm:p-6 lg:p-8">
-          {children}
-        </div>
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen bg-[#0a0a0f]">
+        <Sidebar />
+        <DashboardContent>{children}</DashboardContent>
+      </div>
+    </SidebarProvider>
   );
 }
